@@ -9,44 +9,53 @@ A simple Telegram User/Bot built using Gramjs.
 - Can run both user and bot accounts
 - External plugin support
 - External Bot support
-
+- PM2
 
 ## Run Locally
 
-Clone the project
+- Clone the project
 
 ```bash
-  git clone https://github.com/darkdeathoriginal/Darkbot
+git clone https://github.com/darkdeathoriginal/Darkbot
 ```
 
-Go to the project directory
+- Go to the project directory
 
 ```bash
-  cd Darkbot
+cd Darkbot
 ```
 
-Install dependencies
+- Install dependencies
 
 ```bash
-  npm install
+npm install
 ```
-Setup Environment Variables
 
-`API_ID`
+- Create file env
 
-`API_HASH`
+```bash
+cp .env.example .env
+```
 
-`BOT_TOKEN`
+- Setup Environment Variables
 
-`DATABASE_URL` (Postgress/optional)
+```text
+API_ID="" | API ID From Telegram API  
+API_HASH="" | API HASH From Telegram API  
+AS_BOT_API=TRUE | Running Script As Bot API
+BOT_TOKEN="" | Need Fill Bot Token IF As Bot API True
+LOG_DETAIL="INFO"
+SESSION="" | Generate Sessions Code or Empty This to Auto Generate
+DATABASE_URL="./bot.db" | Optional Database Remote | Default SQLITE
+```
 
-Setup account
+- Setup account
 
 ```bash
   node .
 ```
 
-Start BOT
+- Start BOT
 
 ```bash
   npm start
