@@ -1,48 +1,46 @@
 const axios = require("axios");
 const fs = require("fs");
 const { Module } = require("../index");
-const ExternalPluginDb = require("../modals/externalPlugins");
+const ExternalPluginModel = require('../models/ExternalPluginModel');
 
 Module(
-  {
-    pattern: "install ?(.*)",
-    fromMe: true,
-    use: "owner",
-    desc: "plugin installer",
-  },
+  { pattern: "install ?(.*)", fromMe: true, use: "owner", desc: "plugin installer" },
   async (message, match) => {
     match = match[1];
+
     if (!match || !/\bhttps?:\/\/\S+/gi.test(match))
       return await message.send("need url");
-    await ExternalPluginDb.sync();
+
+    await ExternalPluginModel.sync();
+
     let links = match.match(/\bhttps?:\/\/\S+/gi);
+
     for (let link of links) {
       try {
         var url = new URL(link);
       } catch {
         return await message.send("invalid url");
       }
-      if (
-        url.host === "gist.github.com" ||
-        url.host === "gist.githubusercontent.com"
-      ) {
-        url = !url?.toString().endsWith("raw")
-          ? url.toString() + "/raw"
-          : url.toString();
+
+      if (url.host === "gist.github.com" || url.host === "gist.githubusercontent.com") {
+        url = !url?.toString().endsWith("raw") ? url.toString() + "/raw" : url.toString();
       } else {
         url = url.toString();
       }
+
       try {
         var response = await axios(url + "?timestamp=" + new Date());
       } catch {
         return await message.send("invalid url");
       }
+
       let plugin_name = /pattern: ["'](.*?)["'],/g.exec(response.data);
       var plugin_name_temp = response.data.match(/pattern: ["'](.*?)["'],/g)
         ? response.data
-            .match(/pattern: ["'](.*?)["'],/g)
-            .map((e) => e.replace("pattern", "").replace(/[^a-zA-Z]/g, ""))
+          .match(/pattern: ["'](.*?)["'],/g)
+          .map((e) => e.replace("pattern", "").replace(/[^a-zA-Z]/g, ""))
         : "temp";
+
       try {
         plugin_name = plugin_name[1].split(" ")[0];
       } catch {
@@ -50,20 +48,19 @@ Module(
           "_Invalid plugin. No plugin name found!_"
         );
       }
+
       fs.writeFileSync("./plugins/" + plugin_name + ".js", response.data);
-      plugin_name_temp =
-        plugin_name_temp.length > 1 ? plugin_name_temp.join(", ") : plugin_name;
+      plugin_name_temp = plugin_name_temp.length > 1 ? plugin_name_temp.join(", ") : plugin_name;
+
       try {
         require("./" + plugin_name);
       } catch (e) {
         fs.unlinkSync(__dirname + "/" + plugin_name + ".js");
         return await message.send("invalid plugin\n" + e);
       }
+
       await message.send(plugin_name_temp + " installed.");
-      await ExternalPluginDb.create({
-        url: url,
-        name: plugin_name,
-      });
+      await ExternalPluginModel.create({ url: url, name: plugin_name });
     }
   }
 );
@@ -76,8 +73,8 @@ Module(
     desc: "plugin list",
   },
   async (message, match) => {
-    await ExternalPluginDb.sync();
-    var plugins = await ExternalPluginDb.findAll();
+    await ExternalPluginModel.sync();
+    var plugins = await ExternalPluginModel.findAll();
     if (match[1] !== "") {
       var plugin = plugins.filter(
         (_plugin) => _plugin.dataValues.name === match[1]
@@ -92,7 +89,7 @@ Module(
       return;
     }
     var msg = "\n";
-    var plugins = await ExternalPluginDb.findAll();
+    var plugins = await ExternalPluginModel.findAll();
     if (plugins.length < 1) {
       return await message.send("plugin not found");
     } else {
@@ -120,8 +117,8 @@ Module(
   },
   async (message, match) => {
     if (match[1] === "") return await message.send("need plugin");
-    await ExternalPluginDb.sync();
-    var plugin = await ExternalPluginDb.findAll({
+    await ExternalPluginModel.sync();
+    var plugin = await ExternalPluginModel.findAll({
       where: {
         name: match[1],
       },

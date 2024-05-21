@@ -1,12 +1,12 @@
 const { bots } = require("./handler");
 const fs = require("fs");
 const botFolder = "./bot/bots/";
-const ExternalBotDb = require("../modals/externalBot");
+const ExternalBotsModel = require("../models/ExternalBotsModel");
 const axios = require("axios");
 
 (async () => {
-  await ExternalBotDb.sync();
-  const all = await ExternalBotDb.findAll();
+  await ExternalBotsModel.sync();
+  const all = await ExternalBotsModel.findAll();
   for (let i of all) {
     if (!fs.existsSync(__dirname + `/bots/${i.name}.js`)) {
       try {

@@ -1,12 +1,12 @@
 const { StringSession } = require("telegram/sessions");
-const BotDb = require("../../modals/bot");
+const BotModel = require("../../models/BotModel");
 const { createBot } = require("../../lib/createClient");
 const Message = require("../../lib/Message");
-const { NewMessage, Raw} = require("telegram/events");
+const { NewMessage, Raw } = require("telegram/events");
 const { CallbackQuery } = require("telegram/events/CallbackQuery");
 const { Api } = require("telegram");
 const { getSudo, DEVELOPMENT } = require("../../config");
-const {apiId,apiHash} = require("../../config");
+const { apiId, apiHash } = require("../../config");
 const { Callback } = require("./Callback");
 
 class Bot {
@@ -16,11 +16,15 @@ class Bot {
     this.modules = [];
   }
   async init() {
-    console.log(`${this.name} is starting...`);
-    await BotDb.sync();
+    console.log(`${this.name} Father is starting...`);
+    await BotModel.sync();
+
     let session = "";
-    const bot = await BotDb.findOne({ where: { token: this.BOT_TOKEN } });
+
+    const bot = await BotModel.findOne({ where: { token: this.BOT_TOKEN } });
+
     if (bot) session = bot.session;
+
     const stringSession = new StringSession(session);
 
     this.client = await createBot(
@@ -29,18 +33,25 @@ class Bot {
       this.BOT_TOKEN,
       stringSession
     );
+
     await this.setCommands();
+
     console.log(`${this.name} started!`);
-    for(let module of this.modules){
-      if(module.on && module.on == "start" && module.callback) module.callback(this.client)
+
+    for (let module of this.modules) {
+      if (module.on && module.on == "start" && module.callback) module.callback(this.client)
     }
+
     try {
-      if(!DEVELOPMENT) this.client.send(getSudo(),{text:`${this.name} started!`})
+      if (!DEVELOPMENT) this.client.send(getSudo(), { text: `${this.name} started!` })
     } catch (error) {
       console.log(error);
     }
+    
     session = this.client.session.save();
+    
     if (!bot) this.saveSession(this.BOT_TOKEN, session);
+    
     this.client.addEventHandler(async (event) => {
       let test = new Message(this.client, event.message);
       for (let i of this.modules) {
@@ -61,35 +72,41 @@ class Bot {
         }
       }
     }, new NewMessage({}));
+    
     this.client.addEventHandler(async (event) => {
-      const callback = new Callback(this.client,event.query);
-      for(let module of this.modules){
-        if(module.on && module.on == "callback_query" && module.callback){
+      const callback = new Callback(this.client, event.query);
+      for (let module of this.modules) {
+        if (module.on && module.on == "callback_query" && module.callback) {
           module.callback(callback, this.client)
         }
       }
     }, new CallbackQuery({}));
+    
     await this.client.getMe();
-    this.client.addEventHandler((event)=>{
+    
+    this.client.addEventHandler((event) => {
       if (event instanceof Api.UpdateBotInlineQuery) {
-        for(let module of this.modules){
-          if(module.on && module.on == "inline_query" && module.callback){
+        for (let module of this.modules) {
+          if (module.on && module.on == "inline_query" && module.callback) {
             module.callback(event, this.client)
           }
         }
       }
-    },new Raw({}))
+    }, new Raw({}))
   }
+
   addCommand(command) {
     this.modules.push(command);
   }
+
   async saveSession(token, session) {
-    await BotDb.create({ token, session });
+    await BotModel.create({ token, session });
   }
+
   async setCommands() {
     const commands = [];
     for (let i of this.modules) {
-      if (i.pattern && i.description&& !i.dontAdd) {
+      if (i.pattern && i.description && !i.dontAdd) {
         commands.push(
           new Api.BotCommand({
             command: i.pattern,

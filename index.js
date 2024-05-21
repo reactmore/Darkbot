@@ -76,6 +76,7 @@ const stringSession = new StringSession(session || "");
     await client.sendMessage("me", { message: changelog });
   }
 })();
+
 Module(
   { pattern: "start", fromMe: true, desc: "Start command", use: "utility" },
   async (m) => {
