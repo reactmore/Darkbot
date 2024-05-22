@@ -2,9 +2,16 @@ const startCommand = {
   pattern: "start",
   description: "Start command",
   callback: async (message, match, obj) => {
+    console.log(obj.modules[2]);
     let msg = "Bot is started!\n\nBot commands:\n";
     for (let i of obj.modules) {
-      if(i.pattern && i.description && !i.dontAdd){
+      if (i.pattern && i.description && !i.dontAdd && !i.sudo) {
+        msg += `/${i.pattern} - ${i.description}\n`;
+      }
+    }
+    msg += "\nBot Admin Command:\n"
+    for (let i of obj.modules) {
+      if (i.pattern && i.description && !i.dontAdd && i.sudo) {
         msg += `/${i.pattern} - ${i.description}\n`;
       }
     }
@@ -22,4 +29,7 @@ const pingCommand = {
     await m.send(`ʟᴀᴛᴇɴᴄʏ: ${end - start} ᴍs`);
   },
 };
+
+
+
 module.exports = { startCommand, pingCommand };
