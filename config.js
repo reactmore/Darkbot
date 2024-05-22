@@ -20,7 +20,7 @@ if (DATABASE_URL === './bot.db') {
         {
             host: process.env.DATABASE_HOST || '127.0.0.1',
             dialect: DATABASE_URL,
-            logging: process.env.STATE === undefined ? FALSE : console.log,
+            logging: false,
             define: {
                 freezeTableName: true,
             },
