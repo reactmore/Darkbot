@@ -3,3 +3,5 @@ node_modules
 bot.db
 dev-*
 temp/*
+.idx/*
+.vscode/*
