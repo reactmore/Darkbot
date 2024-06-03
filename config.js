@@ -47,6 +47,7 @@ module.exports = {
     apiId: Number(process.env.API_ID),
     apiHash: process.env.API_HASH,
     session: process.env.SESSION ? process.env.SESSION : "",
+    AS_BOT_API: process.env.AS_BOT_API,
     BOT_TOKEN: process.env.BOT_TOKEN,
     sudo: this.sudo,
     DEVELOPMENT: process.env.STATE === undefined ? false : process.env.STATE,

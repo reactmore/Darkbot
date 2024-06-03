@@ -9,7 +9,7 @@ const Message = require("./lib/Message");
 const {CreateClient } = require("./lib/createClient");
 const git = simpleGit();
 require("dotenv").config();
-const { apiId, apiHash, session, setSudo } = require("./config");
+const { apiId, apiHash, session, setSudo, AS_BOT_API } = require("./config");
 
 const modules = [];
 
@@ -34,7 +34,8 @@ const stringSession = new StringSession(session || "");
     if (message) {
       for (const module of modules) {
         if ((module.fromMe && sender.self) || !module.fromMe) {
-          const regex = new RegExp(`^\\.\\s*${module.pattern}`);
+          const regex = new RegExp(`^\\.\\s*${module.pattern}$`);
+          // const regex = new RegExp(`^\\.\\s*${module.pattern}`);
           const match = message.match(regex);
           if (match) {
             module.callback(test, match);
@@ -42,11 +43,13 @@ const stringSession = new StringSession(session || "");
         }
       }
     }
+
     for (const module of modules) {
       if (module.on && module.on == "message" && ((module.fromMe && sender.self) || !module.fromMe)) {
         module.callback(test);
       }
     }
+
   }, new NewMessage({}));
   await client.start({
     phoneNumber: async () => await input.text("number ?"),
@@ -61,11 +64,14 @@ const stringSession = new StringSession(session || "");
     fs.writeFileSync(".env", file);
   }
   console.log("Bot is ready.");
+
   const me = await client.getMe();
   setSudo(me.id);
-  require("./bot/index");
+  if (AS_BOT_API === true) {
+    require("./bot/index");
+  }
   await client.sendMessage("me", { message: "Bot has been started.." });
-  var commits = await git.log(["main" + "..origin/" + "main"]);
+  var commits = await git.log(["dev" + "..origin/" + "dev"]);
   var mss = "";
   if (commits.total != 0) {
     var changelog = "_Pending updates:_\n\n";

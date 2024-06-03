@@ -40,7 +40,7 @@ Module(
 );
 Module(
   {
-    pattern: "list ?(.*)",
+    pattern: "list\\b ?(.*)",
     fromMe: true,
     desc: "List commands",
     use: "utility",
