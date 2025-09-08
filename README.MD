@@ -49,11 +49,10 @@ Start BOT
 ## Database Support
 
 ```
-DATABASE_URL= "sqlite" for sqlit
-DATABASE_URL="mysql" for mysql
-DATABASE_URL="https://" for Postgress/optional
+DATABASE_URL="sqlite"   # for SQLite
+DATABASE_URL="https://" # for Postgres/optional
 
-For Mysql Uncomment this and comment DATABASE_URL:
+# For MySQL, comment out DATABASE_URL and set the following variables:
 DB_DATABASE=darkbot
 DB_USERNAME=root 
 DB_PASSWORD=
