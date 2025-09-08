@@ -3,13 +3,18 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("bot", "name", {
-      type: Sequelize.STRING,
-      allowNull: true,
+    // change column sessions on bot table to text long for mysql
+    await queryInterface.changeColumn('bot', 'session', {
+      type: Sequelize.TEXT,
+      allowNull: false,
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn("bot", "name");
+    // rollback ke STRING (VARCHAR 255)
+    await queryInterface.changeColumn('bot', 'session', {
+      type: Sequelize.STRING,
+      allowNull: false,
+    });
   }
 };

@@ -10,7 +10,7 @@ class BotModel extends BaseModel {
           allowNull: false
         },
         session: {
-          type: DataTypes.STRING,
+          type: DataTypes.TEXT,
           allowNull: false,
         }
       },

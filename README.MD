@@ -16,44 +16,52 @@ A simple Telegram User/Bot built using Gramjs.
 Clone the project
 
 ```bash
-  git clone https://github.com/darkdeathoriginal/Darkbot
+git clone https://github.com/darkdeathoriginal/Darkbot
 ```
 
 Go to the project directory
 
 ```bash
-  cd Darkbot
+cd Darkbot
 ```
 
 Install dependencies
+```bash
+npm install
+```
+
+### Setup Environment Variables
 
 ```bash
-  npm install
+npm run postinstall 
 ```
-Setup Environment Variables
 
-`API_ID`
-
-`API_HASH`
-
-`BOT_TOKEN`
-
-`DATABASE_URL` (Postgress/optional)
-
-Setup account
-
+### Setup account
 ```bash
   node .
 ```
 
 Start BOT
-
 ```bash
   npm start
 ```
 
+## Database Support
 
-## Usage/Examples
+```
+DATABASE_URL= "sqlite" for sqlit
+DATABASE_URL="mysql" for mysql
+DATABASE_URL="https://" for Postgress/optional
+
+For Mysql Uncomment this and comment DATABASE_URL:
+DB_DATABASE=darkbot
+DB_USERNAME=root 
+DB_PASSWORD=
+DB_HOST="localhost"
+```
+
+
+## Usage/Examples adding plugins
 
 Type `.list` to get list of all user command.
 
