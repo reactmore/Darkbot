@@ -1,7 +1,7 @@
 const axios = require("axios");
 const fs = require("fs");
 const { Module } = require("../index");
-const ExternalPluginDb = require("../modals/externalPlugins");
+const { ExternalPluginsModel } = require("../../models");
 
 Module(
   {
@@ -14,7 +14,7 @@ Module(
     match = match[1];
     if (!match || !/\bhttps?:\/\/\S+/gi.test(match))
       return await message.send("need url");
-    await ExternalPluginDb.sync();
+    await ExternalPluginsModel.sync();
     let links = match.match(/\bhttps?:\/\/\S+/gi);
     for (let link of links) {
       try {
@@ -60,7 +60,7 @@ Module(
         return await message.send("invalid plugin\n" + e);
       }
       await message.send(plugin_name_temp + " installed.");
-      await ExternalPluginDb.create({
+      await ExternalPluginsModel.create({
         url: url,
         name: plugin_name,
       });
@@ -76,8 +76,8 @@ Module(
     desc: "plugin list",
   },
   async (message, match) => {
-    await ExternalPluginDb.sync();
-    var plugins = await ExternalPluginDb.findAll();
+    await ExternalPluginsModel.sync();
+    var plugins = await ExternalPluginsModel.findAll();
     if (match[1] !== "") {
       var plugin = plugins.filter(
         (_plugin) => _plugin.dataValues.name === match[1]
@@ -92,7 +92,7 @@ Module(
       return;
     }
     var msg = "\n";
-    var plugins = await ExternalPluginDb.findAll();
+    var plugins = await ExternalPluginsModel.findAll();
     if (plugins.length < 1) {
       return await message.send("plugin not found");
     } else {
@@ -120,8 +120,8 @@ Module(
   },
   async (message, match) => {
     if (match[1] === "") return await message.send("need plugin");
-    await ExternalPluginDb.sync();
-    var plugin = await ExternalPluginDb.findAll({
+    await ExternalPluginsModel.sync();
+    var plugin = await ExternalPluginsModel.findAll({
       where: {
         name: match[1],
       },
