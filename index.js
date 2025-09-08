@@ -11,12 +11,11 @@ const { CreateClient } = require("./lib/createClient");
 const git = simpleGit();
 require("dotenv").config();
 const { apiId, apiHash, setSudo } = require("./config");
-const ExternalPluginDb = require("./modals/externalPlugins");
+const {ExternalPluginsModel, KeystoreModel} = require("./models");
 const { default: axios } = require("axios");
 const express = require("express");
 const qrcode = require("qrcode");
 const http = require("http");
-const KeyStoreDb = require("./modals/keystore");
 
 const modules = [];
 
@@ -30,8 +29,8 @@ function Module(moduleConfig, callback) {
 
 (async () => {
   console.log("Bot is starting...");
-  await KeyStoreDb.sync();
-  const session = await KeyStoreDb.findOne({ where: { key: "session" } });
+  await KeystoreModel.sync();
+  const session = await KeystoreModel.findOne({ where: { key: "session" } });
   const stringSession = new StringSession(session?.value || "");
   const client = new CreateClient(stringSession, apiId, apiHash, {
     connectionRetries: 5,
@@ -64,6 +63,7 @@ function Module(moduleConfig, callback) {
       }
     }
   }, new NewMessage({}));
+
   if (!session) {
     if (process.env.WEB_LOGIN_ENABLED === "true") {
       const runLoginServer = () => {
@@ -209,23 +209,27 @@ function Module(moduleConfig, callback) {
     }
     console.log("Login successful! Saving session to .env file...");
     const newSessionString = client.session.save();
-    await KeyStoreDb.upsert({ key: "session", value: newSessionString });
+    await KeystoreModel.upsert({ key: "session", value: newSessionString });
     console.log("Session saved. Please restart the bot.");
   }
+
   await client.connect();
   console.log("Bot is ready.");
   const me = await client.getMe();
   setSudo(me.id);
   require("./bot/index");
   await client.getDialogs();
+
   for (const module of modules) {
     if (module.on && module.on == "start") {
       module.callback(client);
     }
   }
+
   await client.sendMessage("me", { message: "Bot has been started.." });
   var commits = await git.log(["main" + "..origin/" + "main"]);
   var mss = "";
+
   if (commits.total != 0) {
     var changelog = "_Pending updates:_\n\n";
     for (var i in commits.all) {
@@ -262,7 +266,9 @@ function Module(moduleConfig, callback) {
       console.log(`Health server running on port ${PORT}`);
     });
   }
+  
 })();
+
 Module(
   { pattern: "start", fromMe: true, desc: "Start command", use: "utility" },
   async (m) => {
@@ -277,9 +283,10 @@ module.exports = {
   Module,
   modules,
 };
+
 (async () => {
-  await ExternalPluginDb.sync();
-  let plugins = await ExternalPluginDb.findAll();
+  await ExternalPluginsModel.sync();
+  let plugins = await ExternalPluginsModel.findAll();
   await plugins.forEach(async (plugin) => {
     const pluginName = plugin.name;
     const pluginUrl = plugin.url;

@@ -4,7 +4,7 @@ const { bots } = require("../handler");
 const { startCommand, pingCommand } = require("../utils/defaultCommands");
 const axios = require("axios");
 const fs = require("fs");
-const ExternalBotDb = require("../../modals/externalBot");
+const { ExternalBotModel } = require("../../models");
 const { ButtonBuilder } = require("../utils/buttonBuilder");
 const { Button } = require("telegram/tl/custom/button");
 
@@ -32,7 +32,7 @@ botHandler({
       description: "update external bot",
       sudo: true,
       callback: async (m) => {
-        let bots = await ExternalBotDb.findAll();
+        let bots = await ExternalBotModel.findAll();
         if (bots.length < 1) return await m.send("No External bots found");
         let msg = "Bots:\n";
         const button = new ButtonBuilder();
@@ -60,7 +60,7 @@ botHandler({
           return await m.send("Send bot gist url");
         }
         if (state == "link") {
-          await ExternalBotDb.sync();
+          await ExternalBotModel.sync();
           state = false;
           match = m.message;
           let links = match.match(/\bhttps?:\/\/\S+/gi);
@@ -122,7 +122,7 @@ botHandler({
               return await m.send("Error in plugin\n" + e);
             }
             await m.send(plugin_name + " installed.");
-            await ExternalBotDb.create({
+            await ExternalBotModel.create({
               url: url,
               name: plugin_name,
               token,
@@ -137,7 +137,7 @@ botHandler({
       sudo: true,
       description: "remove external bot",
       callback: async (m, match) => {
-        let bots = await ExternalBotDb.findAll();
+        let bots = await ExternalBotModel.findAll();
         if (bots.length < 1) return await m.send("No External bots found");
         let msg = "Bots:\n";
         const button = new ButtonBuilder();
@@ -184,8 +184,8 @@ botHandler({
         if (m.query.startsWith("removebot-")) {
           await m.answer();
           const name = m.query.split("-")[1];
-          await ExternalBotDb.sync();
-          var plugin = await ExternalBotDb.findAll({
+          await ExternalBotModel.sync();
+          var plugin = await ExternalBotModel.findAll({
             where: {
               name: name,
             },
@@ -208,8 +208,8 @@ botHandler({
         if(m.query.startsWith("updateBot-")){
           await m.answer();
           const name = m.query.split("-")[1];
-          await ExternalBotDb.sync();
-          var plugin = await ExternalBotDb.findAll({
+          await ExternalBotModel.sync();
+          var plugin = await ExternalBotModel.findAll({
             where: {
               name: name,
             },
