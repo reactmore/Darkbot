@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const { KeystoreModel } = require("./models");
-const loginRoutes = require("./routes/login.routes");
+const routes = require("./routes");
 const { startQrLogin, startInteractiveLogin } = require("./controllers/login.controller");
 const { initBot } = require("./services/bot.service");
 
@@ -13,8 +13,11 @@ const { initBot } = require("./services/bot.service");
   const session = await KeystoreModel.findOne({ where: { key: "session" } });
 
   const app = express();
+
   app.use(express.json());
-  app.use("/", loginRoutes);
+
+  app.use("/", routes);
+  
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

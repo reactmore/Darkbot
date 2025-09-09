@@ -8,6 +8,7 @@ const { CreateClient } = require("../lib/createClient");
 const input = require("input");
 const { KeystoreModel } = require("../models");
 const { apiId, apiHash } = require("../config");
+const { console } = require("inspector");
 
 let qrCodeDataUri = "";
 let loginStatus = "INITIALIZING";
@@ -38,7 +39,6 @@ async function getQr(req, res) {
     }
     res.json({ qr: qrCodeDataUri });
 }
-
 
 async function submitPassword(req, res) {
     const { password } = req.body;
@@ -77,9 +77,9 @@ async function startQrLogin() {
                     ) {
                         loginStatus = "RESTARTING";
                         statusMessage = "QR Code expired. Generating new one...";
-                        qrCodeDataUri = ""; // kosongkan biar client fetch ulang
+                        qrCodeDataUri = ""; // Clear it so the client fetches it again.
 
-                        // reset resolver password supaya tidak bocor
+                        // Reset the password resolver to prevent leaks.
                         passwordResolver = null;
 
                         setTimeout(() => {
