@@ -1,4 +1,4 @@
-const { Module } = require("../index");
+const { Module } = require("../services/bot.service");
 
 Module(
   {

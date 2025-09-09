@@ -1,4 +1,4 @@
-const { Module, modules } = require("../index");
+const { Module, modules } = require("../services/bot.service");
 const { TelegramClient, Api } = require("telegram");
 const { CustomFile } = require("telegram/client/uploads");
 const axios = require("axios");
