@@ -1,0 +1,153 @@
+<!-- file: login.html (updated) -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telegram Login</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 2em;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 300px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #qr-code {
+            margin: 1.5em 0;
+        }
+
+        /* Form is hidden by default */
+        #password-form {
+            display: none;
+            flex-direction: column;
+            gap: 1em;
+        }
+
+        input {
+            padding: 0.8em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        button {
+            padding: 0.8em;
+            border: none;
+            border-radius: 4px;
+            background-color: #0088cc;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0077b3;
+        }
+
+        #status {
+            margin-top: 1em;
+            color: #555;
+            min-height: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Scan QR Code to Log In</h1>
+        <div id="qr-code">
+            <!-- The QR code image will be injected here by the server -->
+            %%QR_CODE_IMAGE%%
+        </div>
+
+        <!-- Status message will be updated by JS -->
+        <div id="status">Please scan the QR code...</div>
+
+        <form id="password-form">
+            <input type="password" id="password" placeholder="Enter 2FA Password" autocomplete="off" required />
+            <button type="submit">Submit Password</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById("password-form");
+        const passwordInput = document.getElementById("password");
+        const statusDiv = document.getElementById("status");
+        let pollingInterval;
+
+        // Function to poll the server for login status
+        const pollStatus = async () => {
+            try {
+                const response = await fetch("/status");
+                const data = await response.json();
+
+                // Update the status message on the page
+                statusDiv.textContent = data.message;
+
+                if (data.status === "PASSWORD_NEEDED") {
+                    // Show the password form when the server requests it
+                    form.style.display = "flex";
+                }
+
+                if (data.status === "LOGGED_IN" || data.status === "ERROR") {
+                    // Stop polling if the process is finished or failed
+                    clearInterval(pollingInterval);
+                    form.style.display = "none"; // Hide form on success/error
+                }
+            } catch (error) {
+                statusDiv.textContent = "Connection to server lost.";
+                clearInterval(pollingInterval);
+            }
+        };
+
+        // Start polling every 2 seconds
+        pollingInterval = setInterval(pollStatus, 1000);
+
+        // Handle the form submission
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const password = passwordInput.value;
+            statusDiv.textContent = "Submitting password...";
+
+            try {
+                const response = await fetch("/submit-password", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: password }),
+                });
+
+                if (response.ok) {
+                    form.style.display = "none";
+                    // The polling will eventually pick up the "LOGGED_IN" status
+                } else {
+                    const result = await response.json();
+                    statusDiv.textContent = `Error: ${result.message || "Submission failed"
+                        }`;
+                }
+            } catch (error) {
+                statusDiv.textContent = "Network error during submission.";
+            }
+        });
+    </script>
+</body>
+
+</html>
