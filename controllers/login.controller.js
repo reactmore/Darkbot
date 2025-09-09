@@ -24,17 +24,21 @@ const client = new CreateClient(stringSession, apiId, apiHash, {
 async function getLoginPage(req, res) {
     fs.readFile("views/login.html", "utf8", (err, html) => {
         if (err) return res.status(500).send("Error: Could not load login.html");
-        const pageContent = html.replace(
-            "%%QR_CODE_IMAGE%%",
-            `<img src="${qrCodeDataUri}" alt="QR Code">`
-        );
-        res.send(pageContent);
+        res.send(html);
     });
 }
 
 async function getStatus(req, res) {
     res.json({ status: loginStatus, message: statusMessage });
 }
+
+async function getQr(req, res) {
+    if (!qrCodeDataUri) {
+        return res.json({ qr: "" });
+    }
+    res.json({ qr: qrCodeDataUri });
+}
+
 
 async function submitPassword(req, res) {
     const { password } = req.body;
@@ -48,35 +52,60 @@ async function submitPassword(req, res) {
 
 async function startQrLogin() {
     await client.connect();
-    await client.signInUserWithQrCode(
-        { apiId, apiHash },
-        {
-            qrCode: async (code) => {
-                const token = code.token.toString("base64url");
-                const url = `tg://login?token=${token}`;
-                qrCodeDataUri = await qrcode.toDataURL(url);
-                loginStatus = "WAITING_FOR_SCAN";
-                statusMessage = "Please scan the QR code in your browser.";
-            },
-            password: () => {
-                loginStatus = "PASSWORD_NEEDED";
-                statusMessage = "2FA Password Required.";
-                return passwordPromise;
-            },
-            onError: (err) => {
-                loginStatus = "ERROR";
-                statusMessage = `An error occurred: ${err.message}`;
-                console.error("Error during QR login:", err);
-            },
-        }
-    );
+    try {
+        await client.signInUserWithQrCode(
+            { apiId, apiHash },
+            {
+                qrCode: async (code) => {
+                    const token = code.token.toString("base64url");
+                    const url = `tg://login?token=${token}`;
+                    qrCodeDataUri = await qrcode.toDataURL(url);
+                    loginStatus = "WAITING_FOR_SCAN";
+                    statusMessage = "Please scan the QR code in your browser.";
+                },
+                password: () => {
+                    loginStatus = "PASSWORD_NEEDED";
+                    statusMessage = "2FA Password Required.";
+                    return passwordPromise;
+                },
+                onError: async (err) => {
+                    console.error("Error during QR login:", err);
 
-    loginStatus = "LOGGED_IN";
-    statusMessage = "Login complete. Saving session...";
+                    if (
+                        err.errorMessage === "AUTH_TOKEN_EXPIRED" ||
+                        err.message?.includes("auth_token_expired")
+                    ) {
+                        loginStatus = "RESTARTING";
+                        statusMessage = "QR Code expired. Generating new one...";
+                        qrCodeDataUri = ""; // kosongkan biar client fetch ulang
 
-    const newSessionString = client.session.save();
-    await KeystoreModel.upsert({ key: "session", value: newSessionString });
-    return newSessionString;
+                        // reset resolver password supaya tidak bocor
+                        passwordResolver = null;
+
+                        setTimeout(() => {
+                            startQrLogin().catch(console.error);
+                        }, 1500);
+                        return;
+                    }
+
+                    loginStatus = "ERROR";
+                    statusMessage = `An error occurred: ${err.message}`;
+                },
+            }
+        );
+
+        loginStatus = "LOGGED_IN";
+        statusMessage = "Login complete. Saving session...";
+
+        const newSessionString = client.session.save();
+        await KeystoreModel.upsert({ key: "session", value: newSessionString });
+        return newSessionString;
+    } catch (err) {
+        console.error("Unexpected error in startQrLogin:", err);
+        loginStatus = "ERROR";
+        statusMessage = `Login failed: ${err.message}`;
+        return null;
+    }
 }
 
 async function startInteractiveLogin() {
@@ -98,6 +127,7 @@ async function startInteractiveLogin() {
 module.exports = {
     getLoginPage,
     getStatus,
+    getQr,
     submitPassword,
     startQrLogin,
     startInteractiveLogin,

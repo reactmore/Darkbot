@@ -6,6 +6,7 @@ const { checkSession } = require("../middlewares/session.middleware");
 router.get("/", checkSession, loginController.getLoginPage);
 router.get("/login", loginController.getLoginPage);
 router.get("/status", loginController.getStatus);
+router.get("/qr", loginController.getQr);
 router.post("/submit-password", loginController.submitPassword);
 
 module.exports = router;
