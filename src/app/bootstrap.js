@@ -3,7 +3,7 @@ require("dotenv").config();
 const { Logger } = require("teleproto");
 const { StringSession } = require("teleproto/sessions");
 
-const { CreateClient } = require("../lib/createClient");
+const { CreateClient } = require("../lib/client/createClient");
 const { apiId, apiHash, setSudo } = require("../config");
 const { KeystoreModel } = require("../models");
 

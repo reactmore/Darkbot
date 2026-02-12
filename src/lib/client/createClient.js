@@ -4,7 +4,7 @@ const { NewMessage } = require("teleproto/events");
 const { CustomFile } = require("teleproto/client/uploads");
 const { LogLevel } = require("teleproto/extensions/Logger");
 const fs = require("fs");
-const Message = require("./Message");
+const Message = require("../message/Message");
 const EventEmitter = require("events");
 
 async function createUrlFile(path, type = "image") {

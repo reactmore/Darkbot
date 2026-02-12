@@ -1,5 +1,5 @@
 const { NewMessage } = require("teleproto/events");
-const Message = require("../lib/Message");
+const Message = require("../lib/message/Message");
 const { modules } = require("./moduleRegistry");
 
 /**
@@ -15,7 +15,7 @@ function registerDispatcher(client) {
 
             if (!event.message) return;
 
-            /** @type {import('../lib/Message')} */
+            /** @type {import('../lib/message/Message')} */
             const test = new Message(client, event.message);
 
             const message = event.message.message;

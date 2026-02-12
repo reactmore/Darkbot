@@ -1,5 +1,5 @@
 /**
- * @typedef {import('../lib/Message')} MessageType
+ * @typedef {import('../lib/message/Message')} MessageType
  */
 
 /**

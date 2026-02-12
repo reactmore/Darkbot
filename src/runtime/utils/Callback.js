@@ -1,5 +1,5 @@
 const { Api } = require("teleproto");
-const Base = require("../../lib/Base");
+const Base = require("../../lib/message/Base");
 const { decompressText } = require("../../lib/helpers");
 
 class Callback extends Base {

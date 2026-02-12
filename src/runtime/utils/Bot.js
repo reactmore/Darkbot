@@ -1,7 +1,7 @@
 const { StringSession } = require("teleproto/sessions");
 const { BotModel } = require("../../models");
-const { createBot } = require("../../lib/createClient");
-const Message = require("../../lib/Message");
+const { createBot } = require("../../lib/client/createClient");
+const Message = require("../../lib/message/Message");
 const { NewMessage, Raw } = require("teleproto/events");
 const { CallbackQuery } = require("teleproto/events/CallbackQuery");
 const { Api } = require("teleproto");
