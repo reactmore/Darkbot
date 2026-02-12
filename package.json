@@ -29,7 +29,8 @@
     "sharp": "^0.33.4",
     "simple-git": "^3.19.0",
     "sqlite3": "^5.1.6",
-    "telegram": "^2.26.22"
+    "telegram": "^2.26.22",
+    "teleproto": "^1.222.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",

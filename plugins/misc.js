@@ -1,6 +1,4 @@
 const { Module, modules } = require("../index");
-const { TelegramClient, Api } = require("telegram");
-const { CustomFile } = require("telegram/client/uploads");
 const axios = require("axios");
 const fs = require("fs");
 require("dotenv").config();

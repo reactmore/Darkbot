@@ -1,11 +1,11 @@
 /// <reference path="./types.js" />
-const { Logger } = require("telegram");
-const { StringSession } = require("telegram/sessions");
-const { NewMessage } = require("telegram/events");
+const { Logger } = require("teleproto");
+const { StringSession } = require("teleproto/sessions");
+const { NewMessage } = require("teleproto/events");
 const input = require("input");
 const fs = require("fs");
 const simpleGit = require("simple-git");
-const { LogLevel } = require("telegram/extensions/Logger");
+const { LogLevel } = require("teleproto/extensions/Logger");
 const Message = require("./lib/Message");
 const { CreateClient } = require("./lib/createClient");
 const git = simpleGit();
@@ -34,7 +34,7 @@ function Module(moduleConfig, callback) {
   const stringSession = new StringSession(session?.value || "");
   const client = new CreateClient(stringSession, apiId, apiHash, {
     connectionRetries: 5,
-    baseLogger: new Logger(LogLevel.ERROR),
+    baseLogger: new Logger(LogLevel.DEBUG),
   });
 
   client.addEventHandler(async (event) => {

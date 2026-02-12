@@ -1,10 +1,10 @@
-const { StringSession } = require("telegram/sessions");
+const { StringSession } = require("teleproto/sessions");
 const { BotModel } = require("../../models");
 const { createBot } = require("../../lib/createClient");
 const Message = require("../../lib/Message");
-const { NewMessage, Raw } = require("telegram/events");
-const { CallbackQuery } = require("telegram/events/CallbackQuery");
-const { Api } = require("telegram");
+const { NewMessage, Raw } = require("teleproto/events");
+const { CallbackQuery } = require("teleproto/events/CallbackQuery");
+const { Api } = require("teleproto");
 const { getSudo, DEVELOPMENT } = require("../../config");
 const { apiId, apiHash } = require("../../config");
 const { Callback } = require("./Callback");

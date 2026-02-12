@@ -6,7 +6,7 @@ const axios = require("axios");
 const fs = require("fs");
 const { ExternalBotModel } = require("../../models");
 const { ButtonBuilder } = require("../utils/buttonBuilder");
-const { Button } = require("telegram/tl/custom/button");
+const { Button } = require("teleproto/tl/custom/button");
 
 let state = false;
 let token;

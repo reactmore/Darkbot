@@ -1,4 +1,4 @@
-const { Api } = require("telegram");
+const { Api } = require("teleproto");
 const Base = require("../../lib/Base");
 const { decompressText } = require("../../lib/helpers");
 
