@@ -8,43 +8,48 @@ const { modules } = require("./moduleRegistry");
 function registerDispatcher(client) {
 
     client.addEventHandler(
+
         /**
          * @param {import('teleproto').Api.TypeUpdate} event
          */
         async (event) => {
+            try {
+                if (!event.message) return;
 
-            if (!event.message) return;
+                /** @type {import('../lib/message/Message')} */
+                const test = new Message(client, event.message);
 
-            /** @type {import('../lib/message/Message')} */
-            const test = new Message(client, event.message);
+                const message = event.message.message;
+                const sender = await event.message.getSender();
 
-            const message = event.message.message;
-            const sender = await event.message.getSender();
+                // COMMAND HANDLER
+                if (message) {
+                    for (const module of modules) {
+                        if (!module.pattern) continue;
 
-            // COMMAND HANDLER
-            if (message) {
-                for (const module of modules) {
-                    if (!module.pattern) continue;
+                        if ((module.fromMe && sender.self) || !module.fromMe) {
+                            const regex = new RegExp(`^\\.\\s*${module.pattern}`);
+                            const match = message.match(regex);
 
-                    if ((module.fromMe && sender.self) || !module.fromMe) {
-                        const regex = new RegExp(`^\\.\\s*${module.pattern}`);
-                        const match = message.match(regex);
-
-                        if (match) {
-                            await module.callback(test, match);
+                            if (match) {
+                                await module.callback(test, match);
+                            }
                         }
                     }
                 }
-            }
 
-            // EVENT HANDLER (on: message)
-            for (const module of modules) {
-                if (
-                    module.on === "message" &&
-                    ((module.fromMe && sender.self) || !module.fromMe)
-                ) {
-                    await module.callback(test);
+                // EVENT HANDLER (on: message)
+                for (const module of modules) {
+                    if (
+                        module.on === "message" &&
+                        ((module.fromMe && sender.self) || !module.fromMe)
+                    ) {
+                        await module.callback(test);
+                    }
                 }
+            } catch (err) {
+                console.error("=== GLOBAL DISPATCH EVENT ERROR ===");
+                console.error(err.stack || err);
             }
         },
         new NewMessage({})

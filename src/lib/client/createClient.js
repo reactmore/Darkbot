@@ -2,6 +2,7 @@
 
 const { TelegramClient, Api, Logger } = require("teleproto");
 const { NewMessage } = require("teleproto/events");
+const Message = require("./../message/Message");
 const { LogLevel } = require("teleproto/extensions/Logger");
 const EventEmitter = require("events");
 
@@ -18,7 +19,7 @@ class CreateClient extends TelegramClient {
   constructor(stringSession, apiId, apiHash, options = {}) {
     super(stringSession, apiId, apiHash, {
       connectionRetries: 5,
-      baseLogger: new Logger(LogLevel.ERROR),
+      baseLogger: new Logger(LogLevel.DEBUG),
       ...options,
     });
     this.event = new EventEmitter();

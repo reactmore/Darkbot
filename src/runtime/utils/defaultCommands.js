@@ -1,13 +1,15 @@
 const startCommand = {
   pattern: "start",
   description: "Start command",
-  callback: async (message, match, obj) => {
-    let msg = "Bot is started!\n\nBot commands:\n";
-    for (let i of obj.modules) {
-      if(i.pattern && i.description && !i.dontAdd){
-        msg += `/${i.pattern} - ${i.description}\n`;
+  callback: async (message, match, botInstance) => {
+    let msg = "Bot is started!\n\nCommands:\n";
+
+    for (let cmd of botInstance.commands) {
+      if (cmd.pattern && cmd.description) {
+        msg += `/${cmd.pattern} - ${cmd.description}\n`;
       }
     }
+
     await message.send(msg);
   },
 };
@@ -15,11 +17,12 @@ const startCommand = {
 const pingCommand = {
   pattern: "ping",
   description: "Ping command",
-  callback: async (m, match) => {
-    let start = new Date().getTime();
-    await m.send(`❮ ᴛᴇsᴛɪɴɢ ᴘɪɴɢ ❯`);
-    let end = new Date().getTime();
-    await m.send(`ʟᴀᴛᴇɴᴄʏ: ${end - start} ᴍs`);
+  callback: async (m, match, botInstance) => {
+    const start = Date.now();
+    await m.send("Testing...");
+    const end = Date.now();
+    await m.send(`Latency: ${end - start} ms`);
   },
 };
+
 module.exports = { startCommand, pingCommand };

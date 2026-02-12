@@ -44,8 +44,8 @@ class Message extends Base {
     return new Message(this.client,await this.data.getReplyMessage());
   }
   async send(text) {
-    let a = await this.client.send(this.jid, {
-      text: text,
+    let a = await this.client.sendMessage(this.jid, {
+      message: text,
     });
     return new Message(this.client, a);
   }
