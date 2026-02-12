@@ -4,6 +4,9 @@ const { Logger } = require("teleproto");
 const { StringSession } = require("teleproto/sessions");
 
 const { CreateClient } = require("../lib/client/createClient");
+const { extendClient } = require("../lib/client/clientExtensions");
+
+
 const { apiId, apiHash, setSudo } = require("../config");
 const { KeystoreModel } = require("../models");
 
@@ -30,6 +33,8 @@ async function bootstrap() {
         connectionRetries: 5,
         baseLogger: new Logger("info"),
     });
+
+    extendClient(client);
 
     registerDispatcher(client);
 

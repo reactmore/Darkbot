@@ -1,6 +1,6 @@
 const { buildReplyMarkup } = require("teleproto/client/buttons");
 const { Button } = require("teleproto/tl/custom/button");
-const { compressText } = require("../../lib/helpers");
+const { compressText } = require("../../lib/utils/compression");
 class ButtonBuilder {
     constructor() {
         this.button = []
