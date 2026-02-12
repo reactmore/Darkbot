@@ -1,11 +1,21 @@
 require("dotenv").config();
 const { Sequelize } = require('sequelize');
+const path = require("path");
+
+
+const DB_PATH = path.join(
+    __dirname,
+    "..",
+    "storage",
+    "database",
+    "bot.db"
+);
 
 let sequelize;
 if (process.env.DATABASE_URL === 'sqlite') {
     sequelize = new Sequelize({
         dialect: "sqlite",
-        storage: "./bot.db",
+        storage: DB_PATH,
         logging: false,
     });
 } else if (process.env.DATABASE_URL) {

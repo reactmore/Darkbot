@@ -1,6 +1,15 @@
 const Base = require("./Base");
 const fs = require("fs");
+
+
+/**
+ * @extends Base
+ */
 class Message extends Base {
+  /**
+   * @param {import('teleproto').TelegramClient} client
+   * @param {any} data
+   */
   constructor(client, data) {
     super(client);
     if (data) this._patch(data, client);

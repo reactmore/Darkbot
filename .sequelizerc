@@ -1,8 +1,8 @@
 const path = require('path');
 
 module.exports = {
-  'config': path.resolve(__dirname, 'config', 'database-cli.js'), // for CLI
-  'models-path': path.resolve(__dirname, 'models'),
-  'seeders-path': path.resolve(__dirname, 'database', 'seeders'),
-  'migrations-path': path.resolve(__dirname, 'database', 'migrations')
+  'config': path.resolve('src', 'config', 'database-cli.js'),
+  'models-path': path.resolve('src', 'models'),
+  'seeders-path': path.resolve('src', 'database', 'seeders'),
+  'migrations-path': path.resolve('src', 'database', 'migrations')
 };

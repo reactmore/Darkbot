@@ -1,3 +1,4 @@
+// lib/createClient.js
 const { TelegramClient, Api, Logger } = require("teleproto");
 const { NewMessage } = require("teleproto/events");
 const { CustomFile } = require("teleproto/client/uploads");
@@ -25,7 +26,16 @@ async function createBufferFile(buffer, type = "image") {
   return result;
 }
 
+/**
+ * @extends TelegramClient
+ */
 class CreateClient extends TelegramClient {
+  /**
+   * @param {any} stringSession
+   * @param {number} apiId
+   * @param {string} apiHash
+   * @param {object} options
+   */
   constructor(stringSession, apiId, apiHash, options) {
     super(stringSession, apiId, apiHash, {
       ...options,

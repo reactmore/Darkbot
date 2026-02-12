@@ -1,6 +1,7 @@
 const { bots } = require("./handler");
 const fs = require("fs");
-const botFolder = "./bot/bots/";
+const path = require("path");
+const botFolder = path.join(__dirname, "bots");
 const { ExternalBotModel } = require("../models");
 const axios = require("axios");
 

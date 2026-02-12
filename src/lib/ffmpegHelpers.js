@@ -1,3 +1,4 @@
+// lib/ffmpegHelpers
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 

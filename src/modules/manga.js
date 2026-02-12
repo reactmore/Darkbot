@@ -1,4 +1,4 @@
-const { Module } = require("../index");
+const { Module } = require("../core/moduleRegistry");
 const axios = require("axios");
 const cheerio = require("cheerio");
 const fs = require("fs");

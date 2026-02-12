@@ -1,4 +1,4 @@
-const { Module } = require("../index");
+const { Module } = require("../core/moduleRegistry");
 
 // aturan per group
 const GROUP_RULES = {
@@ -40,7 +40,7 @@ const GROUP_RULES = {
   }
 };
 
-const DESK_GROUP_ID =  Object.keys(GROUP_RULES)[2]
+const DESK_GROUP_ID = Object.keys(GROUP_RULES)[2]
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (minMs, maxMs) => Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;

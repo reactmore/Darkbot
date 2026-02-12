@@ -1,4 +1,4 @@
-const { Module, modules } = require("../index");
+const { Module, modules } = require("../core/moduleRegistry");
 const axios = require("axios");
 const fs = require("fs");
 require("dotenv").config();

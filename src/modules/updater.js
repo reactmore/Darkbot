@@ -1,4 +1,4 @@
-const { Module } = require('../index');
+const { Module } = require("../core/moduleRegistry");
 const simpleGit = require('simple-git');
 const git = simpleGit();
 

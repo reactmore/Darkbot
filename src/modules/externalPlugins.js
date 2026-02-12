@@ -1,6 +1,6 @@
 const axios = require("axios");
 const fs = require("fs");
-const { Module } = require("../index");
+const { Module } = require("../core/moduleRegistry");
 const { ExternalPluginsModel } = require("./../models");
 
 Module(

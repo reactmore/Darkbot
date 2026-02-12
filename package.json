@@ -2,11 +2,11 @@
   "name": "darkbot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "jest --forceExit",
-    "start": "pm2 start . --attach --name Darkbot",
-    "dev": "nodemon index.js",
+    "dev": "nodemon src/index.js",
+    "start": "pm2 start src/index.js --attach --name Darkbot",
     "postinstall": "test -f .env || cp .env-example .env"
   },
   "keywords": [],

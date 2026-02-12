@@ -1,6 +1,6 @@
 const config = require("../config");
 const fs = require("fs");
-const { Module } = require("../index");
+const { Module } = require("../core/moduleRegistry");
 
 Module(
   {
