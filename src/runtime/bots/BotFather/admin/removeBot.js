@@ -9,7 +9,10 @@ module.exports = {
 
     callback: async (m) => {
 
-        const bots = await ExternalBotModel.findAll();
+        const bots = await ExternalBotModel.findAll({
+            where: { isActive: true }
+        });
+
         if (!bots.length) return await m.send("No external bots found");
 
         const btn = new ButtonBuilder();

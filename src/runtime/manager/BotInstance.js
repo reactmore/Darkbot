@@ -38,12 +38,28 @@ class BotInstance {
 
         const stringSession = new StringSession(session);
 
-        this.client = await createBot(
-            apiId,
-            apiHash,
-            this.token,
-            stringSession
-        );
+        try {
+
+            this.client = await createBot(
+                apiId,
+                apiHash,
+                this.token,
+                stringSession
+            );
+
+        } catch (err) {
+
+            if (err.seconds) {
+                console.log(
+                    `Flood wait ${err.seconds}s for ${this.name}... waiting...`
+                );
+                await new Promise(res => setTimeout(res, err.seconds * 1000));
+                return this.start(); // retry
+            }
+
+            throw err;
+        }
+       
 
         this.loadCommands();
 

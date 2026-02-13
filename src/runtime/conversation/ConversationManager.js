@@ -51,7 +51,7 @@ class ConversationManager {
 
     async execute(session, message) {
 
-        if (!session.active) return;
+        if (!session || !session.active) return;
 
         const flow = this.flows.get(session.flow);
         if (!flow) {
@@ -67,7 +67,8 @@ class ConversationManager {
 
         const data = JSON.parse(session.data || "{}");
 
-        await stepFn(message, { data, session });
+        // ✅ NO WRAPPER OBJECT
+        await stepFn(message, data, session);
 
         session.step += 1;
         session.data = JSON.stringify(data);
@@ -80,12 +81,15 @@ class ConversationManager {
     }
 
     async finish(session) {
+        if (!session) return;
         session.active = false;
         session.completedAt = new Date();
         await session.save();
     }
 
     async stop(userId, botToken) {
+
+        if (!userId || !botToken) return;
 
         await ConversationBotModel.update(
             { active: false, completedAt: new Date() },

@@ -22,10 +22,11 @@ module.exports = {
 
             if (!external) return await m.send("Bot not found");
 
-            const token = external.token;
+            await BotModel.destroy({
+                where: { token: external.token }
+            });
 
             await external.destroy();
-            await BotModel.destroy({ where: { token } });
 
             const folderPath = path.join(botsRoot, name);
 
@@ -57,7 +58,7 @@ module.exports = {
             await m.send("Bot updating...");
             await m.send("Restarting runtime...");
 
-            process.exit(1);
+            process.exit(1); 
         }
     }
 };

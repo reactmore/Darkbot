@@ -1,4 +1,4 @@
-const { DataTypes, Op } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const BaseModel = require("./BaseModel");
 
 class ExternalBotModel extends BaseModel {
@@ -9,13 +9,31 @@ class ExternalBotModel extends BaseModel {
           type: DataTypes.STRING,
           allowNull: false,
         },
+
         name: {
           type: DataTypes.STRING,
           allowNull: false,
         },
+
         token: {
           type: DataTypes.STRING,
           allowNull: false,
+        },
+
+        sourceType: {
+          type: DataTypes.ENUM("gist", "repo"),
+          allowNull: false,
+        },
+
+        branch: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          defaultValue: "main",
+        },
+
+        isActive: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: true,
         }
       },
       {
@@ -28,9 +46,7 @@ class ExternalBotModel extends BaseModel {
     );
   }
 
-  static associate(models) {
-
-  }
+  static associate(models) {}
 }
 
 module.exports = ExternalBotModel;
