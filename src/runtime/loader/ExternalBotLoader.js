@@ -6,13 +6,22 @@ const { ExternalBotModel } = require("../../models");
 const botFolder = path.join(__dirname, "../bots");
 
 async function loadExternalBots() {
+
     await ExternalBotModel.sync();
+
     const all = await ExternalBotModel.findAll();
 
     for (const bot of all) {
-        const filePath = path.join(botFolder, `${bot.name}.js`);
+
+        const folderPath = path.join(botFolder, bot.name);
+        const filePath = path.join(folderPath, "index.js");
+
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+        }
 
         if (!fs.existsSync(filePath)) {
+
             let url = new URL(bot.url);
 
             if (
@@ -35,11 +44,15 @@ async function loadExternalBots() {
         }
     }
 
-    const files = fs.readdirSync(botFolder);
+    // LOAD ALL BOT FOLDERS
+    const folders = fs.readdirSync(botFolder);
 
-    for (const file of files) {
-        if (file.endsWith(".js")) {
-            require(path.join(botFolder, file));
+    for (const folder of folders) {
+
+        const indexPath = path.join(botFolder, folder, "index.js");
+
+        if (fs.existsSync(indexPath)) {
+            require(indexPath);
         }
     }
 }

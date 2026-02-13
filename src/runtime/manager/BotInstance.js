@@ -17,6 +17,7 @@ const { apiId, apiHash, getSudo, DEVELOPMENT } = require("../../config");
 class BotInstance {
 
     constructor(definition) {
+        this.definition = definition;
         this.name = definition.name;
         this.token = definition.BOT_TOKEN;
         this.commandsPath = definition.commandsPath;
@@ -81,7 +82,7 @@ class BotInstance {
 
                 const folder = path.join(this.commandsPath, category);
 
-                if (!folder || !fs.existsSync(folder)) continue;
+                if (!fs.existsSync(folder)) continue;
 
                 const files = fs.readdirSync(folder);
 
@@ -96,8 +97,8 @@ class BotInstance {
             return;
         }
 
-        // 2️⃣ LEGACY MODE (IMPORTANT FOR EXTERNAL BOTS)
-        if (Array.isArray(this.definition?.commands)) {
+        // 2️⃣ LEGACY MODE (EXTERNAL BOT GIST)
+        if (Array.isArray(this.definition.commands)) {
             this.commands = this.definition.commands;
         }
     }
@@ -112,7 +113,7 @@ class BotInstance {
                 const text = event.message?.message;
 
                 // 1️⃣ conversation first
-                if (await ConversationManager.handle(msg)) return;
+                if (await ConversationManager.handle(msg, this.token)) return;
 
                 let matched = false;
 

@@ -1,9 +1,19 @@
 require("dotenv").config(); 
+const { Sequelize } = require('sequelize');
+const path = require("path");
+
+const DB_PATH = path.join(
+    __dirname,
+    "..",
+    "storage",
+    "database",
+    "bot.db"
+);
 
 module.exports = {
   development: {
     dialect: 'sqlite',
-    storage: "./bot.db",
+    storage: DB_PATH,
   },
   production: {
     username: process.env.DB_USERNAME,
