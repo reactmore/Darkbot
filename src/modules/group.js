@@ -12,7 +12,7 @@ const GROUP_RULES = {
 ✅ Ready P2P di beberapa exchange  
 
 📩 DM: @fvckinD`,
-    mode: "auto",
+    mode: "save",
   },
   "3541121270": { // Airdrop Pedia
     triggers: ["seller", "seler"],  // Keyword              
