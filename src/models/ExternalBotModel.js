@@ -27,17 +27,8 @@ class ExternalBotModel extends BaseModel {
 
         branch: {
           type: DataTypes.STRING,
+          allowNull: true,
           defaultValue: "main",
-        },
-
-        clientId: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-        },
-
-        isRegistered: {
-          type: DataTypes.BOOLEAN,
-          defaultValue: false,
         },
 
         isActive: {
@@ -55,11 +46,7 @@ class ExternalBotModel extends BaseModel {
     );
   }
 
-  static associate(models) {
-    this.belongsTo(models.ClientAccountModel, {
-      foreignKey: 'clientId'
-    });
-  }
+  static associate(models) {}
 }
 
 module.exports = ExternalBotModel;
