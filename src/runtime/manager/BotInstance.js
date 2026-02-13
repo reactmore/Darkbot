@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const { StringSession } = require("teleproto/sessions");
 const { NewMessage, Raw } = require("teleproto/events");
 const { CallbackQuery } = require("teleproto/events/CallbackQuery");
@@ -7,14 +10,17 @@ const { BotModel } = require("../../models");
 const { createBot } = require("../../lib/client/createClient");
 const Message = require("../../lib/message/Message");
 const { Callback } = require("../utils/Callback");
+const ConversationManager = require("../conversation/ConversationManager");
 
 const { apiId, apiHash, getSudo, DEVELOPMENT } = require("../../config");
 
 class BotInstance {
+
     constructor(definition) {
         this.name = definition.name;
         this.token = definition.BOT_TOKEN;
-        this.commands = definition.commands || [];
+        this.commandsPath = definition.commandsPath;
+        this.commands = [];
     }
 
     async start() {
@@ -24,7 +30,7 @@ class BotInstance {
 
         let session = "";
         const existing = await BotModel.findOne({
-            where: { token: this.token },
+            where: { token: this.token }
         });
 
         if (existing) session = existing.session;
@@ -38,6 +44,8 @@ class BotInstance {
             stringSession
         );
 
+        this.loadCommands();
+
         await this.setCommands();
 
         this.attachHandlers();
@@ -47,31 +55,67 @@ class BotInstance {
         if (!existing) {
             await BotModel.create({
                 token: this.token,
-                session: this.client.session.save(),
+                session: this.client.session.save()
             });
         }
 
         if (!DEVELOPMENT) {
             try {
                 await this.client.sendMessage(getSudo(), {
-                    message: `${this.name} started.`,
+                    message: `${this.name} started`
                 });
             } catch { }
         }
 
-        console.log(`${this.name} started.`);
+        console.log(`${this.name} started`);
+    }
+
+    loadCommands() {
+
+        // 1️⃣ MODULAR MODE
+        if (this.commandsPath) {
+
+            const categories = ["admin", "user", "system"];
+
+            for (const category of categories) {
+
+                const folder = path.join(this.commandsPath, category);
+
+                if (!folder || !fs.existsSync(folder)) continue;
+
+                const files = fs.readdirSync(folder);
+
+                for (const file of files) {
+                    if (file.endsWith(".js")) {
+                        const command = require(path.join(folder, file));
+                        this.commands.push(command);
+                    }
+                }
+            }
+
+            return;
+        }
+
+        // 2️⃣ LEGACY MODE (IMPORTANT FOR EXTERNAL BOTS)
+        if (Array.isArray(this.definition?.commands)) {
+            this.commands = this.definition.commands;
+        }
     }
 
     attachHandlers() {
 
+        // MESSAGE
         this.client.addEventHandler(async (event) => {
+
             try {
                 const msg = new Message(this.client, event.message);
                 const text = event.message?.message;
 
-                let commandMatched = false;
+                // 1️⃣ conversation first
+                if (await ConversationManager.handle(msg)) return;
 
-                // 1️⃣ HANDLE COMMAND PATTERN
+                let matched = false;
+
                 for (const cmd of this.commands) {
 
                     if (!cmd.pattern) continue;
@@ -80,35 +124,32 @@ class BotInstance {
                     const match = text?.match(regex);
 
                     if (match) {
-                        if (cmd.sudo && getSudo() != msg.jid) return;
 
-                        commandMatched = true;
+                        if (cmd.admin && getSudo() != msg.jid) return;
+
+                        matched = true;
                         await cmd.callback(msg, match, this);
-                        break; // STOP setelah command match
+                        break;
                     }
                 }
 
-                // 2️⃣ HANDLE GENERIC MESSAGE (STATE MACHINE)
-                if (!commandMatched) {
+                if (!matched) {
                     for (const cmd of this.commands) {
-
-                        if (cmd.on !== "message") continue;
-
-                        if (cmd.sudo && getSudo() != msg.jid) continue;
-
-                        await cmd.callback(msg, [], this);
+                        if (cmd.on === "message") {
+                            if (cmd.admin && getSudo() != msg.jid) continue;
+                            await cmd.callback(msg, [], this);
+                        }
                     }
                 }
 
             } catch (err) {
-                console.error("=== BOT EVENT ERROR ===");
+                console.error("=== BOT ERROR ===");
                 console.error(err.stack || err);
             }
 
         }, new NewMessage({}));
 
-
-        // CALLBACK QUERY
+        // CALLBACK
         this.client.addEventHandler(async (event) => {
             const cb = new Callback(this.client, event.query);
 
@@ -119,7 +160,6 @@ class BotInstance {
             }
 
         }, new CallbackQuery({}));
-
 
         // INLINE
         this.client.addEventHandler((event) => {
@@ -137,11 +177,11 @@ class BotInstance {
         const list = [];
 
         for (const cmd of this.commands) {
-            if (cmd.pattern && cmd.description && !cmd.dontAdd) {
+            if (cmd.pattern && cmd.description) {
                 list.push(
                     new Api.BotCommand({
                         command: cmd.pattern,
-                        description: cmd.description,
+                        description: cmd.description
                     })
                 );
             }
@@ -151,7 +191,7 @@ class BotInstance {
             new Api.bots.SetBotCommands({
                 scope: new Api.BotCommandScopeDefault(),
                 langCode: "en",
-                commands: list,
+                commands: list
             })
         );
     }
