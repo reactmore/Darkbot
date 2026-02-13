@@ -5,7 +5,7 @@ const http = require("http");
 const fs = require("fs");
 const qrcode = require("qrcode");
 
-async function handleLogin(client, session, apiId, apiHash, KeystoreModel) {
+async function handleLogin(client, session, apiId, apiHash, ClientAccountModel) {
     if (session) return;
 
     if (process.env.WEB_LOGIN_ENABLED === "true") {
@@ -19,9 +19,34 @@ async function handleLogin(client, session, apiId, apiHash, KeystoreModel) {
         });
     }
 
+    await client.connect();
+    const me = await client.getMe();
+
     console.log("Login successful! Saving session...");
+    
     const newSessionString = client.session.save();
-    await KeystoreModel.upsert({ key: "session", value: newSessionString });
+
+    const checkSession = await ClientAccountModel.findOne({
+        where: { session: newSessionString }
+    });
+
+    console.log(checkSession);
+
+    const existingMain = await ClientAccountModel.findOne({
+        where: { isMain: true }
+    });
+
+    console.log(existingMain);
+
+    if (!checkSession) {
+        await ClientAccountModel.create({
+            phone: me.phone,
+            session: newSessionString,
+            isActive: true,
+            isMain: existingMain ? false : true
+        });
+    }
+
     console.log("Session saved. Please restart the bot.");
 }
 
