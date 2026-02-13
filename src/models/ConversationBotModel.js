@@ -1,4 +1,4 @@
-const { DataTypes, Op } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const BaseModel = require("./BaseModel");
 
 class ConversationBotModel extends BaseModel {
@@ -21,11 +21,21 @@ class ConversationBotModel extends BaseModel {
                     type: DataTypes.STRING,
                     allowNull: false
                 },
-
                 data: {
                     type: DataTypes.TEXT,
                     allowNull: true
+                },
+
+                active: {
+                    type: DataTypes.BOOLEAN,
+                    defaultValue: true
+                },
+
+                completedAt: {
+                    type: DataTypes.DATE,
+                    allowNull: true
                 }
+
             },
             {
                 tableName: 'conversation_bot',
@@ -35,10 +45,6 @@ class ConversationBotModel extends BaseModel {
             },
             sequelize
         );
-    }
-
-    static associate(models) {
-
     }
 }
 

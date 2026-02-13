@@ -73,7 +73,9 @@ class BotInstance {
 
     loadCommands() {
 
+        // ==============================
         // 1️⃣ MODULAR MODE
+        // ==============================
         if (this.commandsPath) {
 
             const categories = ["admin", "user", "system"];
@@ -97,7 +99,9 @@ class BotInstance {
             return;
         }
 
-        // 2️⃣ LEGACY MODE (EXTERNAL BOT GIST)
+        // ==============================
+        // 2️⃣ LEGACY MODE (GIST EXTERNAL BOT)
+        // ==============================
         if (Array.isArray(this.definition.commands)) {
             this.commands = this.definition.commands;
         }
@@ -105,18 +109,20 @@ class BotInstance {
 
     attachHandlers() {
 
-        // MESSAGE
+        // ==============================
+        // MESSAGE HANDLER
+        // ==============================
         this.client.addEventHandler(async (event) => {
 
             try {
                 const msg = new Message(this.client, event.message);
                 const text = event.message?.message;
 
-                // 1️⃣ conversation first
-                if (await ConversationManager.handle(msg, this.token)) return;
+                let commandMatched = false;
 
-                let matched = false;
-
+                // =========================================
+                // 1️⃣ PRIORITY: MATCH COMMAND FIRST
+                // =========================================
                 for (const cmd of this.commands) {
 
                     if (!cmd.pattern) continue;
@@ -128,18 +134,29 @@ class BotInstance {
 
                         if (cmd.admin && getSudo() != msg.jid) return;
 
-                        matched = true;
+                        commandMatched = true;
                         await cmd.callback(msg, match, this);
-                        break;
+                        return; // ⛔ STOP HERE
                     }
                 }
 
-                if (!matched) {
-                    for (const cmd of this.commands) {
-                        if (cmd.on === "message") {
-                            if (cmd.admin && getSudo() != msg.jid) continue;
-                            await cmd.callback(msg, [], this);
-                        }
+                // =========================================
+                // 2️⃣ THEN HANDLE CONVERSATION
+                // =========================================
+                if (await ConversationManager.handle(msg, this.token)) {
+                    return;
+                }
+
+                // =========================================
+                // 3️⃣ GENERIC MESSAGE LISTENER
+                // =========================================
+                for (const cmd of this.commands) {
+
+                    if (cmd.on === "message") {
+
+                        if (cmd.admin && getSudo() != msg.jid) continue;
+
+                        await cmd.callback(msg, [], this);
                     }
                 }
 
@@ -150,8 +167,12 @@ class BotInstance {
 
         }, new NewMessage({}));
 
-        // CALLBACK
+
+        // ==============================
+        // CALLBACK QUERY HANDLER
+        // ==============================
         this.client.addEventHandler(async (event) => {
+
             const cb = new Callback(this.client, event.query);
 
             for (const cmd of this.commands) {
@@ -162,23 +183,33 @@ class BotInstance {
 
         }, new CallbackQuery({}));
 
-        // INLINE
+
+        // ==============================
+        // INLINE QUERY HANDLER
+        // ==============================
         this.client.addEventHandler((event) => {
+
             if (event instanceof Api.UpdateBotInlineQuery) {
+
                 for (const cmd of this.commands) {
+
                     if (cmd.on === "inline_query") {
                         cmd.callback(event, this.client);
                     }
                 }
             }
+
         }, new Raw({}));
     }
 
     async setCommands() {
+
         const list = [];
 
         for (const cmd of this.commands) {
+
             if (cmd.pattern && cmd.description) {
+
                 list.push(
                     new Api.BotCommand({
                         command: cmd.pattern,

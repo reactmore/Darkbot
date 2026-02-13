@@ -69,3 +69,9 @@ Type `.list` to get list of all user command.
 For external bot run `/addbot` in your bot . [Sample bot](https://gist.github.com/darkdeathoriginal/57995db444bdcafd004887a7de82e9c6)
 
 
+## MIgrate: 
+
+```cli
+npx sequelize-cli migration:generate --name alter-conversation-bot
+```
+

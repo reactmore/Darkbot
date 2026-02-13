@@ -79,6 +79,9 @@ ConversationManager.register(flowName, [
             token: session.data.token
         });
 
+        // BEFORE restart
+        await ConversationManager.stop(msg.jid, session.botToken || session.data.token);
+
         await msg.send(`${pluginName} installed.`);
         await msg.send("Restarting runtime...");
 

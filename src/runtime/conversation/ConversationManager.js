@@ -3,7 +3,7 @@ const { ConversationBotModel } = require("../../models");
 class ConversationManager {
 
     constructor() {
-        this.flows = new Map(); // <flowName, steps[]>
+        this.flows = new Map();
     }
 
     register(flowName, steps) {
@@ -15,19 +15,22 @@ class ConversationManager {
         const flow = this.flows.get(flowName);
         if (!flow) return;
 
-        await ConversationBotModel.destroy({
-            where: { userId, botToken }
-        });
+        // deactivate old
+        await ConversationBotModel.update(
+            { active: false, completedAt: new Date() },
+            { where: { userId, botToken, active: true } }
+        );
 
-        await ConversationBotModel.create({
+        const session = await ConversationBotModel.create({
             userId,
             botToken,
             step: 0,
             flow: flowName,
-            data: JSON.stringify({})
+            data: JSON.stringify({}),
+            active: true
         });
 
-        await this.execute(userId, botToken, message);
+        await this.execute(session, message);
     }
 
     async handle(message, botToken) {
@@ -35,54 +38,66 @@ class ConversationManager {
         const session = await ConversationBotModel.findOne({
             where: {
                 userId: message.jid,
-                botToken
+                botToken,
+                active: true
             }
         });
 
         if (!session) return false;
 
-        await this.execute(message.jid, botToken, message, session);
+        await this.execute(session, message);
         return true;
     }
 
-    async execute(userId, botToken, message, existingSession = null) {
+    async execute(session, message) {
 
-        const session = existingSession || await ConversationBotModel.findOne({
-            where: { userId, botToken }
-        });
-
-        if (!session) return;
+        if (!session.active) return;
 
         const flow = this.flows.get(session.flow);
         if (!flow) {
-            await session.destroy();
+            await this.finish(session);
             return;
         }
 
         const stepFn = flow[session.step];
         if (!stepFn) {
-            await session.destroy();
+            await this.finish(session);
             return;
         }
 
         const data = JSON.parse(session.data || "{}");
 
-        await stepFn(message, { data });
+        await stepFn(message, { data, session });
 
         session.step += 1;
         session.data = JSON.stringify(data);
 
         if (session.step >= flow.length) {
-            await session.destroy();
+            await this.finish(session);
         } else {
             await session.save();
         }
     }
 
+    async finish(session) {
+        session.active = false;
+        session.completedAt = new Date();
+        await session.save();
+    }
+
     async stop(userId, botToken) {
-        await ConversationBotModel.destroy({
-            where: { userId, botToken }
+
+        await ConversationBotModel.update(
+            { active: false, completedAt: new Date() },
+            { where: { userId, botToken, active: true } }
+        );
+    }
+
+    async hasActive(userId, botToken) {
+        const session = await ConversationBotModel.findOne({
+            where: { userId, botToken, active: true }
         });
+        return !!session;
     }
 }
 
