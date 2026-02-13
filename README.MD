@@ -1,71 +1,252 @@
-
 # Darkbot
 
-A simple Telegram User/Bot built using Gramjs.
+A modular Telegram multi-bot runtime powered by Darkbot migrate Gramjs with **Teleproto**.
 
+Supports:
 
-## Features
+- Userbot
+- Multi Bot Tokens
+- External Bot via Gist
+- External Bot via GitHub Repository
+- Modular Command Architecture
+- Database-backed Conversation System
 
-- Can run both user and bot accounts
-- External plugin support
-- External Bot support
+---
 
+## 🚀 Features
 
-## Run Locally
+- Multi bot instance manager
+- Modular bot structure (admin/user/system)
+- Gist plugin support
+- GitHub repository support
+- Auto BOT_TOKEN injection
+- Conversation flow engine (DB based)
+- PM2 ready
+- SQLite / MySQL support
 
-Clone the project
+---
+
+## 📦 Installation
 
 ```bash
-git clone https://github.com/darkdeathoriginal/Darkbot
-```
-
-Go to the project directory
-
-```bash
-cd Darkbot
-```
-
-Install dependencies
-```bash
+git clone https://github.com/reactmore/DarkRuntime
+cd DarkRuntime
 npm install
 ```
 
-### Setup Environment Variables
+---
+
+## ⚙ Setup Environment
 
 ```bash
-npm run postinstall 
+npm run postinstall
 ```
 
-### Setup account
+Edit `.env` file if needed.
+
+---
+
+## 🧪 Run Development
+
 ```bash
-  node .
+npm run dev
 ```
 
-Start BOT
+---
+
+## 🏭 Run Production (Recommended)
+
 ```bash
-  npm start
+npm start
 ```
 
-## Database Support
+(Powered by PM2)
+
+---
+
+## 🗄 Database Configuration
+
+### SQLite (default)
 
 ```
-DATABASE_URL="sqlite"   # for SQLite
-DATABASE_URL="https://" # for Postgres/optional
+DATABASE_URL="sqlite"
+```
 
-# For MySQL, comment out DATABASE_URL and set the following variables:
-DB_DATABASE=darkbot
-DB_USERNAME=root 
+### MySQL
+
+```
+DB_DATABASE=darkruntime
+DB_USERNAME=root
 DB_PASSWORD=
-DB_HOST="localhost"
+DB_HOST=localhost
 ```
 
+---
 
-## Usage/Examples adding plugins
+# 🤖 External Bot Installation
 
-Type `.list` to get list of all user command.
+Inside BotFather:
 
-`.install <gist-url>` can install external plugins,
+```
+/addbot
+```
 
-For external bot run `/addbot` in your bot . [Sample bot](https://gist.github.com/darkdeathoriginal/57995db444bdcafd004887a7de82e9c6)
+You will be asked:
 
+1. Bot Token  
+2. Gist Raw URL OR GitHub Repository URL  
 
+---
+
+# 📦 Supported External Bot Formats
+
+---
+
+## 1️⃣ GIST FORMAT (Single File)
+
+Example:
+
+```
+https://gist.github.com/reactmore/77c6a9825a8ef70c9086ee3c80869753
+```
+
+Example file:
+
+```js
+const { botHandler } = require("../../handler");
+
+botHandler({
+  name: "PingExternalBot",
+  BOT_TOKEN,
+  commands: [
+    {
+      pattern: "start",
+      description: "Start command",
+      callback: async (m) => {
+        await m.send("Bot running 🚀");
+      }
+    }
+  ]
+});
+```
+
+---
+
+## 2️⃣ REPOSITORY FORMAT (Recommended)
+
+Example:
+
+```
+https://github.com/reactmore/PingProBot
+```
+
+### Repository structure:
+
+```
+PingProBot/
+ ├── index.js
+ ├── admin/
+ │    └── stats.js
+ ├── user/
+ │    ├── ping.js
+ │    └── start.js
+ └── system/
+      └── inline.js
+```
+
+### index.js example:
+
+```js
+const { botHandler } = require("../../handler");
+
+botHandler({
+  name: "PingProBot",
+  BOT_TOKEN,
+  commandsPath: __dirname
+});
+```
+
+---
+
+# 🧩 Modular Command Example
+
+### user/ping.js
+
+```js
+module.exports = {
+  pattern: "ping",
+  description: "Ping test",
+  callback: async (m) => {
+    await m.send("Pong 🚀");
+  }
+};
+```
+
+---
+
+# 🔄 Conversation System
+
+Conversation stored in DB:
+
+- userId
+- botToken
+- flow
+- step
+- active
+- completedAt
+
+Supports:
+
+```
+/cancel
+```
+
+to stop active conversation.
+
+---
+
+# 🛠 Migrations
+
+```bash
+npx sequelize-cli db:migrate
+```
+
+---
+
+# 📁 Project Bot Token Structure
+
+```
+runtime/
+ ├── bots/
+ ├── loader/
+ ├── manager/
+ ├── conversation/
+```
+
+---
+
+# ⚠ Notes
+
+- Use PM2 in production
+- Avoid rapid bot restarts (Telegram flood protection)
+- FloodWait automatically handled
+- External bots are auto-downloaded if missing
+
+---
+
+# 🏷 Version
+
+Current version: **2.0.0**
+
+---
+
+# 🧠 Architecture Summary
+
+- Teleproto based runtime
+- Multi-bot support
+- DB-driven conversations
+- Modular external bot system
+- Gist & GitHub repository support
+- Clean restart model (no hot reload hacks)
+
+---

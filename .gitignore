@@ -1,6 +1,5 @@
 node_modules
-.env
-bot.db
-dev-*
-temp/*
 package-lock.json
+src/storage/database/*.db
+src/storage/temp/*
+.env
