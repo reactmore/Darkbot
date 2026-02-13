@@ -1,4 +1,4 @@
-const { DataTypes, Op } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const BaseModel = require("./BaseModel");
 
 class BotModel extends BaseModel {
@@ -9,9 +9,20 @@ class BotModel extends BaseModel {
           type: DataTypes.STRING,
           allowNull: false
         },
+
         session: {
           type: DataTypes.TEXT,
           allowNull: false,
+        },
+
+        clientId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+        },
+
+        isActive: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: true,
         }
       },
       {
@@ -25,7 +36,9 @@ class BotModel extends BaseModel {
   }
 
   static associate(models) {
-
+    this.belongsTo(models.ClientAccountModel, {
+      foreignKey: 'clientId'
+    });
   }
 }
 
