@@ -24,11 +24,11 @@ async function bootstrap() {
     await ClientAccountModel.sync();
 
     // session single dulu 
-    const session = await ClientAccountModel.findOne({
+    const clientAccount = await ClientAccountModel.findOne({
         where: { id: "1" },
     });
 
-    const stringSession = new StringSession(session?.value || "");
+    const stringSession = new StringSession(clientAccount?.session || "");
 
     const client = new CreateClient(stringSession, apiId, apiHash, {
         connectionRetries: 5,
@@ -39,7 +39,7 @@ async function bootstrap() {
 
     registerDispatcher(client);
 
-    await handleLogin(client, session, apiId, apiHash, ClientAccountModel);
+    await handleLogin(client, clientAccount, apiId, apiHash, ClientAccountModel);
 
     await client.connect();
 
@@ -64,7 +64,7 @@ async function bootstrap() {
     });
 
     await checkForUpdates(client);
-    startHealthServer(session);
+    startHealthServer(clientAccount);
 }
 
 module.exports = bootstrap;
