@@ -8,7 +8,7 @@ const { extendClient } = require("../lib/client/clientExtensions");
 
 
 const { apiId, apiHash, setSudo } = require("../config");
-const { KeystoreModel } = require("../models");
+const { ClientAccountModel } = require("../models");
 
 const { registerDispatcher } = require("../core/dispatcher");
 const { modules } = require("../core/moduleRegistry");
@@ -21,13 +21,14 @@ const { checkForUpdates } = require("./updateChecker");
 async function bootstrap() {
     console.log("Bot is starting...");
 
-    await KeystoreModel.sync();
+    await ClientAccountModel.sync();
 
-    const session = await KeystoreModel.findOne({
-        where: { key: "session" },
+    // session single dulu 
+    const clientAccount = await ClientAccountModel.findOne({
+        where: { id: "1" },
     });
 
-    const stringSession = new StringSession(session?.value || "");
+    const stringSession = new StringSession(clientAccount?.session || "");
 
     const client = new CreateClient(stringSession, apiId, apiHash, {
         connectionRetries: 5,
@@ -38,7 +39,7 @@ async function bootstrap() {
 
     registerDispatcher(client);
 
-    await handleLogin(client, session, apiId, apiHash, KeystoreModel);
+    await handleLogin(client, clientAccount, apiId, apiHash, ClientAccountModel);
 
     await client.connect();
 
@@ -63,7 +64,7 @@ async function bootstrap() {
     });
 
     await checkForUpdates(client);
-    startHealthServer(session);
+    startHealthServer(clientAccount);
 }
 
 module.exports = bootstrap;
